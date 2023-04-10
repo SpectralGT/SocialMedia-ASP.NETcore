@@ -2,7 +2,7 @@
 
 namespace webapi.Models
 {
-    public class PostModel
+    public class Post
     {
         public Guid PostId { get; set; }
         public string PostTitle { get; set; } = string.Empty;
