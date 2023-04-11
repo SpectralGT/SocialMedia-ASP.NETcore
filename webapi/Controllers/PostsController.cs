@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +10,7 @@ using webapi.Models;
 
 namespace webapi.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class PostsController : ControllerBase
@@ -33,7 +35,7 @@ namespace webapi.Controllers
 
         // GET: api/Posts/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Post>> GetPost(Guid id)
+        public async Task<ActionResult<Post>> GetPost(int id)
         {
           if (_context.Posts == null)
           {
@@ -52,7 +54,7 @@ namespace webapi.Controllers
         // PUT: api/Posts/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutPost(Guid id, Post post)
+        public async Task<IActionResult> PutPost(int id, Post post)
         {
             if (id != post.PostId)
             {
@@ -97,7 +99,7 @@ namespace webapi.Controllers
 
         // DELETE: api/Posts/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeletePost(Guid id)
+        public async Task<IActionResult> DeletePost(int id)
         {
             if (_context.Posts == null)
             {
@@ -115,7 +117,7 @@ namespace webapi.Controllers
             return NoContent();
         }
 
-        private bool PostExists(Guid id)
+        private bool PostExists(int id)
         {
             return (_context.Posts?.Any(e => e.PostId == id)).GetValueOrDefault();
         }
