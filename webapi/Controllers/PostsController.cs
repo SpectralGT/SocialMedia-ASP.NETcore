@@ -26,10 +26,10 @@ namespace webapi.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Post>>> GetPosts()
         {
-          if (_context.Posts == null)
-          {
-              return NotFound();
-          }
+            if (_context.Posts == null)
+            {
+                return NotFound();
+            }
             return await _context.Posts.ToListAsync();
         }
 

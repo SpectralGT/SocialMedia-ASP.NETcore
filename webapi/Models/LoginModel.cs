@@ -1,11 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using Xunit.Abstractions;
 
 namespace webapi.Models
 {
     public class LoginModel
     {
         [Required(ErrorMessage="email is requiered")]
+        [EmailAddress]
         public string? Email { get; set; }
 
         [Required(ErrorMessage = "epassword is requiered")]
