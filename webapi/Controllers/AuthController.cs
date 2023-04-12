@@ -14,9 +14,9 @@ namespace webapi.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IConfiguration _configuration;
-        private readonly UserManager<User> _userManager;
+        private readonly UserManager<IdentityUser> _userManager;
 
-        public AuthController(IConfiguration configuration, UserManager<User> userManager)
+        public AuthController(IConfiguration configuration, UserManager<IdentityUser> userManager)
         {
             _configuration = configuration;
             _userManager = userManager;
@@ -51,21 +51,22 @@ namespace webapi.Controllers
         [Route("Register")]
         public async Task<IActionResult> RegisterUser([FromBody] RegistrationModel newUser)
         {
-            var userExists = await _userManager.FindByNameAsync(newUser.FirstName);
-            if (userExists != null)
-                return StatusCode(StatusCodes.Status500InternalServerError);
+            if(!ModelState.IsValid){
+                return BadRequest(ModelState);
+            }
 
-            User user = new()
+            var result = _userManager.CreateAsync(new IdentityUser{UserName =  newUser.UserName,Email=newUser.Email},newUser.Password);
+
+            if (result.Result.Succeeded)
             {
-                Email = newUser.Email,
-                SecurityStamp = Guid.NewGuid().ToString(),
-                UserName = newUser.FirstName
-            };
-            var result = await _userManager.CreateAsync(user, newUser.Password);
-            if (!result.Succeeded)
-                return StatusCode(StatusCodes.Status500InternalServerError);
+                return Ok("successfully created account");
+            }
 
-            return Ok(new { Status = "Success", Message = "User created successfully!" });
+            foreach(var error in result.Result.Errors)
+            {
+                ModelState.AddModelError(error.Code,error.Description);
+            }
+            return BadRequest(ModelState);
         }
 
         private JwtSecurityToken GetToken(List<Claim> authClaims)

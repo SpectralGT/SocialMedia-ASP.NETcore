@@ -4,8 +4,8 @@ namespace webapi.Models
 {
     public class RegistrationModel
     {
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
+        [Required]
+        public string UserName { get; set; }
 
         [Required(ErrorMessage = "Email is required")]
         [EmailAddress]
