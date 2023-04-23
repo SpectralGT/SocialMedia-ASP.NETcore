@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
+﻿using Firebase.Storage;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using webapi.Models;
 
 namespace webapi.Controllers
 {
-    [Authorize]
+    /*[Authorize]*/
     [Route("api/[controller]")]
     [ApiController]
     public class PostsController : ControllerBase
@@ -37,10 +32,10 @@ namespace webapi.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Post>> GetPost(int id)
         {
-          if (_context.Posts == null)
-          {
-              return NotFound();
-          }
+            if (_context.Posts == null)
+            {
+                return NotFound();
+            }
             var post = await _context.Posts.FindAsync(id);
 
             if (post == null)
@@ -85,16 +80,29 @@ namespace webapi.Controllers
         // POST: api/Posts
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Post>> PostPost(Post post)
+        public async Task<ActionResult<Post>> PostPostAsync([FromForm] PostRequest postRequest)
         {
-          if (_context.Posts == null)
-          {
-              return Problem("Entity set 'ApplicationContext.Posts'  is null.");
-          }
-            _context.Posts.Add(post);
-            await _context.SaveChangesAsync();
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToArray().ToString());
+            }
 
-            return CreatedAtAction("GetPost", new { id = post.PostId }, post);
+            var post = new Post
+            {
+                PostId = new Random().Next(),
+                PostTitle = postRequest.Title,
+                Username = "username"
+            };
+
+            var stream = postRequest.Content.OpenReadStream();
+
+
+            var task = new FirebaseStorage("asp-net-socialmedia.appspot.com").Child(post.PostId.ToString()).PutAsync(stream);
+            task.Progress.ProgressChanged += (s, e) => Console.WriteLine($"Progress: {e.Percentage} %");
+            var downloadUrl = await task;
+
+
+            return Ok();
         }
 
         // DELETE: api/Posts/5
