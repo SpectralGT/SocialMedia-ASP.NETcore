@@ -1,6 +1,7 @@
 ﻿using Firebase.Storage;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using webapi.Classes;
 using webapi.Models;
 
 namespace webapi.Controllers
@@ -11,10 +12,12 @@ namespace webapi.Controllers
     public class PostsController : ControllerBase
     {
         private readonly ApplicationContext _context;
+        private readonly FirestoreProvider _firestoreProvider;
 
-        public PostsController(ApplicationContext context)
+        public PostsController(ApplicationContext context, FirestoreProvider firestoreProvider)
         {
             _context = context;
+            _firestoreProvider = firestoreProvider;
         }
 
         // GET: api/Posts

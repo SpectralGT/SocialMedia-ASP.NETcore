@@ -1,13 +1,15 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Google.Cloud.Firestore;
 
 namespace webapi.Models
 {
-    public class Post
+    [FirestoreData]
+    public class Post : IFirebaseEntity
     {
-        [Key]
-        [Required]
-        public int PostId { get; set; }
+        [FirestoreProperty]
+        public string Id { get; set; }
+        [FirestoreProperty]
         public string? PostTitle { get; set; } = string.Empty;
+        [FirestoreProperty]
         public string Username { get; set; } = string.Empty;
     }
 }

@@ -1,10 +1,18 @@
+using FirebaseAdmin;
+using Google.Cloud.Firestore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using System.Text.Json.Serialization;
+using webapi;
+using webapi.Classes;
 using webapi.Models;
+
+FirebaseApp.Create();
 
 var builder = WebApplication.CreateBuilder(args);
 ConfigurationManager configuration = builder.Configuration;
@@ -38,6 +46,14 @@ builder.Services
         };
     });
 
+
+builder.Services.AddSingleton(_ => new FirestoreProvider(
+    new FirestoreDb
+    {
+        ProjectId = new FirebaseSettings().ProjectId,
+        JsonCredentials = new FirebaseSettings().PrivateKeyId
+    }
+    )) ;
 
 builder.Services.AddSwaggerGen(option =>
 {
