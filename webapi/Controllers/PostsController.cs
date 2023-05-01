@@ -1,7 +1,7 @@
 ﻿using Firebase.Storage;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using webapi.Classes;
+using webapi.Providers;
 using webapi.Models;
 
 namespace webapi.Controllers
@@ -11,73 +11,29 @@ namespace webapi.Controllers
     [ApiController]
     public class PostsController : ControllerBase
     {
-        private readonly ApplicationContext _context;
-        private readonly FirestoreProvider _firestoreProvider;
-
-        public PostsController(ApplicationContext context, FirestoreProvider firestoreProvider)
-        {
-            _context = context;
-            _firestoreProvider = firestoreProvider;
-        }
+        private readonly FirestoreProvider _firestoreProvider = new FirestoreProvider();
 
         // GET: api/Posts
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Post>>> GetPosts()
         {
-            if (_context.Posts == null)
-            {
-                return NotFound();
-            }
-            return await _context.Posts.ToListAsync();
+            return await _firestoreProvider.GetAllPost();
         }
 
         // GET: api/Posts/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Post>> GetPost(int id)
+        public async Task<ActionResult<Post>> GetPost(string id)
         {
-            if (_context.Posts == null)
-            {
-                return NotFound();
-            }
-            var post = await _context.Posts.FindAsync(id);
-
-            if (post == null)
-            {
-                return NotFound();
-            }
-
-            return post;
+            return Ok(_firestoreProvider.GetPostData(id));
         }
 
         // PUT: api/Posts/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutPost(int id, Post post)
+        public async Task<IActionResult> PutPost(Post post)
         {
-            if (id != post.PostId)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(post).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!PostExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            _firestoreProvider.UpdatePost(post);
+            return Ok();
         }
 
         // POST: api/Posts
@@ -87,50 +43,38 @@ namespace webapi.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToArray().ToString());
+                return BadRequest(
+                    ModelState.Values
+                        .SelectMany(v => v.Errors)
+                        .Select(e => e.ErrorMessage)
+                        .ToArray()
+                        .ToString()
+                );
             }
 
-            var post = new Post
-            {
-                PostId = new Random().Next(),
-                PostTitle = postRequest.Title,
-                Username = "username"
-            };
+            var post = new Post { PostTitle = postRequest.Title, Username = "username" };
 
             var stream = postRequest.Content.OpenReadStream();
 
-
-            var task = new FirebaseStorage("asp-net-socialmedia.appspot.com").Child(post.PostId.ToString()).PutAsync(stream);
-            task.Progress.ProgressChanged += (s, e) => Console.WriteLine($"Progress: {e.Percentage} %");
+            var task = new FirebaseStorage("asp-net-socialmedia.appspot.com")
+                .Child(post.Id.ToString())
+                .PutAsync(stream);
+            task.Progress.ProgressChanged += (s, e) =>
+                Console.WriteLine($"Progress: {e.Percentage} %");
             var downloadUrl = await task;
 
+            _firestoreProvider.AddPost(post);
 
             return Ok();
         }
 
         // DELETE: api/Posts/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeletePost(int id)
+        public async Task<IActionResult> DeletePost(string id)
         {
-            if (_context.Posts == null)
-            {
-                return NotFound();
-            }
-            var post = await _context.Posts.FindAsync(id);
-            if (post == null)
-            {
-                return NotFound();
-            }
-
-            _context.Posts.Remove(post);
-            await _context.SaveChangesAsync();
+            _firestoreProvider.DeletePost(id);
 
             return NoContent();
-        }
-
-        private bool PostExists(int id)
-        {
-            return (_context.Posts?.Any(e => e.PostId == id)).GetValueOrDefault();
         }
     }
 }
