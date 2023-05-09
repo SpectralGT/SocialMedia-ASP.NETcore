@@ -1,7 +1,9 @@
 .PostCard{
+    margin: 1em auto;
     color: white;
+    background-color: #000000;
     width: 80%;
-    border: 1px solid white;
+    border: 2px solid #ffffff;
     border-radius: 10px;
     overflow: hidden;
     display: flex;
