@@ -3,6 +3,7 @@ import sampleImage from "../assets/sampleImage.jpeg";
 
 interface Props {
   title: string;
+  content: string;
 }
 
 function PostCard(props: Props) {
@@ -17,7 +18,7 @@ function PostCard(props: Props) {
       </div>
 
       <div className="PostContent">
-        <img src={sampleImage} alt="image" />
+        <img src={props.content} alt="image" />
       </div>
     </div>
   );

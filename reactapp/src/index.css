@@ -1,14 +1,14 @@
 *{
+  box-sizing: border-box;
   padding: 0;
   margin: 0;
-  box-sizing: border-box;
-}
-
-.root{
-  width: 100%;
 }
 
 body{
   width: 100vw;
   background-color: #050505;
+}
+
+.root{
+  width: 100%;
 }

@@ -3,6 +3,14 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using webapi.Providers;
 using webapi.Models;
+using System.Runtime.Intrinsics.Arm;
+using FirebaseAdmin.Messaging;
+
+class ResPos
+{
+    public string Title { get; set; }
+    public string Content { get; set; }
+};
 
 namespace webapi.Controllers
 {
@@ -17,7 +25,22 @@ namespace webapi.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Post>>> GetPosts()
         {
-            return await _firestoreProvider.GetAllPost();
+            List<ResPos> posts = new List<ResPos>();
+            ResPos post = null;
+
+            List<Post> data = await _firestoreProvider.GetAllPost();
+            foreach (Post dbpost in data)
+            {
+                post.Title = dbpost.PostTitle;
+
+                post.Content =
+                    "https://firebasestorage.googleapis.com/v0/b/asp-net-socialmedia.appspot.com/o/"
+                    + dbpost.Id.ToString()
+                    + "?alt=media";
+
+                posts.Add(post);
+            }
+            return data;
         }
 
         // GET: api/Posts/5
