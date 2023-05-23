@@ -14,6 +14,14 @@ builder.Services.AddDbContext<ApplicationContext>(
     opts => opts.UseSqlServer(configuration.GetConnectionString("sqlConnection"))
 );
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.WithOrigins("*");
+    });
+});
+
 builder.Services.AddIdentityCore<IdentityUser>().AddEntityFrameworkStores<ApplicationContext>();
 
 builder.Services
@@ -78,6 +86,7 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
 

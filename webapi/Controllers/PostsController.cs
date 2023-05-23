@@ -6,7 +6,7 @@ using webapi.Models;
 using System.Runtime.Intrinsics.Arm;
 using FirebaseAdmin.Messaging;
 
-class ResPos
+public class ResPos
 {
     public string Title { get; set; }
     public string Content { get; set; }
@@ -23,15 +23,15 @@ namespace webapi.Controllers
 
         // GET: api/Posts
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Post>>> GetPosts()
+        public async Task<ActionResult<IEnumerable<ResPos>>> GetPosts()
         {
             List<ResPos> posts = new List<ResPos>();
-            ResPos post = null;
 
             List<Post> data = await _firestoreProvider.GetAllPost();
             foreach (Post dbpost in data)
             {
-                post.Title = dbpost.PostTitle;
+                ResPos post = new ResPos();
+                post.Title = dbpost.PostTitle ?? "no titile";
 
                 post.Content =
                     "https://firebasestorage.googleapis.com/v0/b/asp-net-socialmedia.appspot.com/o/"
@@ -40,7 +40,7 @@ namespace webapi.Controllers
 
                 posts.Add(post);
             }
-            return data;
+            return Ok(posts);
         }
 
         // GET: api/Posts/5
